@@ -1,0 +1,42 @@
+def obtener_lineas_relevantes(nombre_archivo):
+    with open(nombre_archivo, 'r') as archivo:
+        lineas = archivo.readlines()
+
+    lineas_relevantes = []
+    flag = False  # Flag para indicar cuando se están leyendo las líneas relevantes
+    for linea in lineas:
+        if "MD5" in linea or "SHA256" in linea:
+            flag = True  # Iniciar lectura de líneas relevantes
+            continue
+        if flag and linea.strip() and '  ' in linea.strip():
+            lineas_relevantes.append(linea.strip())
+
+    return lineas_relevantes
+
+def comparar_hashes(archivo1, archivo2):
+    lineas_archivo1 = obtener_lineas_relevantes(archivo1)
+    lineas_archivo2 = obtener_lineas_relevantes(archivo2)
+
+    diferencias = []
+    if len(lineas_archivo1) != len(lineas_archivo2):
+        diferencias.append("La cantidad de líneas difiere entre los archivos.")
+    else:
+        for linea1, linea2 in zip(lineas_archivo1, lineas_archivo2):
+            hash1, ruta1 = linea1.split('  ')
+            hash2, ruta2 = linea2.split('  ')
+            if ruta1 == ruta2 and hash1 != hash2:
+                diferencias.append(f"Diferencia en ruta '{ruta1}': {hash1} - {hash2}")
+
+    if diferencias:
+        with open('diferencias.txt', 'w') as diff_file:
+            for diferencia in diferencias:
+                diff_file.write(f"{diferencia}\n")
+        print("Se encontraron diferencias. Revisa el archivo 'diferencias.txt'.")
+    else:
+        print("Los archivos son idénticos en cuanto a hashes y rutas asociadas.")
+
+if __name__ == "__main__":
+    archivo1 = input("Archivo a comparar 1: ")
+    archivo2 = input("Archivo a comparar 2: ")
+
+    comparar_hashes(archivo1, archivo2)
