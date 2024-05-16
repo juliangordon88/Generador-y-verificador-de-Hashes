@@ -1,0 +1,37 @@
+import os
+import hashlib
+
+def calcular_y_guardar_hashes():
+    carpeta = input("Carpeta a analizar: ")
+    nombre_archivo_salida = input("Nombre del archivo de salida: ")
+
+    hashes_md5 = {}
+    hashes_sha256 = {}
+
+    # Itera sobre todos los archivos en la carpeta y subcarpetas
+    for directorio_actual, subdirectorios, archivos in os.walk(carpeta):
+        for nombre_archivo in archivos:
+            ruta_completa_archivo = os.path.join(directorio_actual, nombre_archivo)
+
+            # Genera el hash MD5 del archivo actual
+            with open(ruta_completa_archivo, 'rb') as archivo:
+                contenido_archivo = archivo.read()
+                hash_md5 = hashlib.md5(contenido_archivo).hexdigest()
+                hashes_md5[ruta_completa_archivo] = hash_md5
+
+                # Genera el hash SHA-256 del archivo actual
+                hash_sha256 = hashlib.sha256(contenido_archivo).hexdigest()
+                hashes_sha256[ruta_completa_archivo] = hash_sha256
+
+    # Guarda los hashes en un archivo con el nombre especificado
+    with open(nombre_archivo_salida, 'w') as archivo_hashes:
+        archivo_hashes.write('\n==========MD5 HASHES==========\n')
+        for ruta_archivo, hash_md5 in hashes_md5.items():
+            archivo_hashes.write(f"{hash_md5}  {ruta_archivo}\n")
+
+        archivo_hashes.write('\n==========SHA256 HASHES==========\n')
+        for ruta_archivo, hash_sha256 in hashes_sha256.items():
+            archivo_hashes.write(f"{hash_sha256}  {ruta_archivo}\n")
+
+if __name__ == "__main__":
+    calcular_y_guardar_hashes()
